@@ -54,21 +54,50 @@ uv sync
 ### 2. Run the Bitwig MCP Server
 
 ```bash
-# Run the server with default settings
+# Run the server (serves MCP over stdio)
 python -m bitwig_mcp_server
-
-# Or run with custom settings
-python -m bitwig_mcp_server --host 127.0.0.1 --send-port 8000 --receive-port 9000 --transport stdio --debug
 ```
 
-### 3. Add to Claude Desktop
+The server takes no command-line flags. Configuration is read from the
+environment (or a `.env` file) with the `BITWIG_MCP_` prefix — see
+`bitwig_mcp_server/settings.py`:
 
 ```bash
-# Install the server in Claude Desktop
-mcp install bitwig_mcp_server/__main__.py
+BITWIG_MCP_BITWIG_HOST=127.0.0.1
+BITWIG_MCP_BITWIG_SEND_PORT=8000
+BITWIG_MCP_BITWIG_RECEIVE_PORT=9000
 ```
 
-Then open Claude Desktop and select the Bitwig MCP Server from the MCP Servers dropdown.
+If Bitwig Studio is not running, the server still starts and serves the
+protocol; tools that read Bitwig state report an error per call.
+
+### 3. Add to an MCP client
+
+This server uses the low-level MCP `Server` API, so the `mcp install` CLI
+helper does not apply to it — register it by configuring the command directly.
+
+**Claude Code** (from the repository root):
+
+```bash
+claude mcp add bitwig --scope project -- /path/to/.venv/bin/python -m bitwig_mcp_server
+```
+
+**Claude Desktop** — add to `claude_desktop_config.json`
+(`%APPDATA%\Claude\` on Windows, `~/Library/Application Support/Claude/` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "bitwig": {
+      "command": "/path/to/.venv/bin/python",
+      "args": ["-m", "bitwig_mcp_server"]
+    }
+  }
+}
+```
+
+Use the absolute path to the project virtualenv's Python so the client does not
+need the environment activated. Then restart the client.
 
 ## Available Tools
 

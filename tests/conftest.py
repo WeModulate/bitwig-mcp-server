@@ -18,10 +18,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 def is_bitwig_running() -> bool:
     """Check if Bitwig is likely running by trying to connect to its OSC port."""
-    # First check environment variable
-    if os.environ.get("BITWIG_TESTS_ENABLED", "").lower() in ("1", "true", "yes"):
-        print("Bitwig integration tests enabled via environment variable")
-        return True
+    # First check environment variable. INTEGRATION_TESTS is what the Makefile
+    # and the documented workflow set, so honour it alongside the original name.
+    for enabling in ("BITWIG_TESTS_ENABLED", "INTEGRATION_TESTS"):
+        if os.environ.get(enabling, "").lower() in ("1", "true", "yes"):
+            print(f"Bitwig integration tests enabled via {enabling}")
+            return True
 
     if os.environ.get("BITWIG_TESTS_DISABLED", "").lower() in ("1", "true", "yes"):
         print("Bitwig integration tests disabled via environment variable")
@@ -30,16 +32,26 @@ def is_bitwig_running() -> bool:
     # Otherwise check for Bitwig
     import subprocess
 
-    # Check if Bitwig is running using ps command
+    # Check the process list. "ps" does not exist on Windows, so ask tasklist
+    # there; without this the check always failed and every integration test
+    # silently skipped.
+    if sys.platform == "win32":
+        process_command = ["tasklist", "/fo", "csv", "/nh"]
+    else:
+        process_command = ["ps", "-A"]
+
     try:
-        result = subprocess.run(["ps", "-A"], capture_output=True, text=True)
-        if "Bitwig Studio" in result.stdout:
+        result = subprocess.run(process_command, capture_output=True, text=True)
+        if "Bitwig" in result.stdout:
             print("Bitwig Studio is running!")
             return True
     except Exception:
         pass
 
-    # If process check fails, try the network approach
+    # If process check fails, try the network approach. Note this rarely helps:
+    # Bitwig replies to its configured send port (9000 by default) rather than
+    # to the ephemeral source port used here, so the recvfrom below usually
+    # times out even when Bitwig is running and listening.
     try:
         # Create socket and try to connect to Bitwig's default OSC port
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

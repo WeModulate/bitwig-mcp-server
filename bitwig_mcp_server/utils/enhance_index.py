@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 
 from bitwig_mcp_server.utils.browser_indexer import BitwigBrowserIndexer
 
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,

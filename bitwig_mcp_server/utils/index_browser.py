@@ -21,7 +21,6 @@ import traceback
 
 from bitwig_mcp_server.utils.browser_indexer import BitwigBrowserIndexer, build_index
 
-
 # Use a more colorful and detailed logging format
 logging.basicConfig(
     level=logging.INFO,

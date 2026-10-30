@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "bitwig": {
+      "type": "stdio",
+      "command": "C:\\dev\\bitwig-mcp-server\\bitwig-mcp-server\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "bitwig_mcp_server"
+      ],
+      "env": {}
+    }
+  }
+}

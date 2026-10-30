@@ -1129,7 +1129,9 @@ class BitwigBrowserIndexer:
 
             # Try to set up browser contexts if we didn't inherit them
             contexts = {}
-            controller_exists = hasattr(self, 'controller') and self.controller is not None
+            controller_exists = (
+                hasattr(self, "controller") and self.controller is not None
+            )
             if controller_exists:
                 logger.info("Setting up browser contexts to access different tabs...")
                 contexts = await setup_browser_contexts(self.controller)
@@ -1495,9 +1497,11 @@ class BitwigBrowserIndexer:
                             "description", ""
                         ),
                         "document": results["documents"][0][i],
-                        "distance": results["distances"][0][i]
-                        if "distances" in results
-                        else None,
+                        "distance": (
+                            results["distances"][0][i]
+                            if "distances" in results
+                            else None
+                        ),
                     }
                 )
 
@@ -1543,9 +1547,9 @@ class BitwigBrowserIndexer:
             "count": count,
             "with_description": with_description,
             "without_description": without_description,
-            "description_percentage": (with_description / count * 100)
-            if count > 0
-            else 0,
+            "description_percentage": (
+                (with_description / count * 100) if count > 0 else 0
+            ),
             "categories": sorted(list(categories)),
             "types": sorted(list(types)),
             "creators": sorted(list(creators)),

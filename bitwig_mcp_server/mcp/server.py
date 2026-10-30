@@ -5,10 +5,14 @@ Implementation of the Model Context Protocol server for Bitwig Studio integratio
 """
 
 import asyncio
+import contextlib
 import logging
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
+
+from pydantic import AnyUrl
 
 from mcp.server import Server as MCPServer
+from mcp.server.stdio import stdio_server
 from mcp.types import TextContent
 
 from bitwig_mcp_server.osc.controller import BitwigOSCController
@@ -51,10 +55,20 @@ class BitwigMCPServer:
         self.mcp_server.read_resource()(self.read_resource)
 
     async def start(self) -> None:
-        """Start the Bitwig MCP server"""
+        """Connect to Bitwig over OSC.
+
+        Losing this connection is not fatal. MCP clients launch their servers
+        at startup, typically before Bitwig Studio is open, so an unreachable
+        Bitwig must not stop us from serving the protocol: we still complete
+        the handshake and list tools. Tools that read Bitwig state then error
+        per call. Note that OSC writes are unacknowledged UDP, so command-style
+        tools still report success whether or not Bitwig received them.
+        """
         try:
-            # Start the OSC controller
-            self.controller.start()
+            # Start the OSC controller. This is blocking, synchronous socket code
+            # that takes ~50s to give up when Bitwig is closed, so it must run off
+            # the event loop or it stalls the MCP transport along with it.
+            await asyncio.to_thread(self.controller.start)
 
             # Wait for controller to be ready
             wait_count = 0
@@ -62,16 +76,23 @@ class BitwigMCPServer:
             while not self.controller.ready and wait_count < max_wait_count:
                 await asyncio.sleep(0.1)
                 wait_count += 1
-
-            if not self.controller.ready:
-                logger.error("Bitwig OSC controller failed to become ready in time")
-                raise RuntimeError("Bitwig OSC controller failed to initialize")
-
-            logger.info(f"Bitwig MCP Server started - hosting {self.settings.app_name}")
         except Exception as e:
-            logger.exception(f"Failed to start Bitwig MCP Server: {e}")
-            await self.stop()
-            raise
+            logger.warning(
+                f"Could not connect to Bitwig over OSC: {e}. Serving MCP anyway. "
+                f"Until Bitwig is reachable, tools that read state will error and "
+                f"commands will be sent into the void (OSC writes are unacknowledged)."
+            )
+            return
+
+        if not self.controller.ready:
+            logger.warning(
+                "Bitwig OSC controller did not become ready in time. Serving MCP "
+                "anyway. Until Bitwig is reachable, tools that read state will error "
+                "and commands will be sent into the void."
+            )
+            return
+
+        logger.info(f"Bitwig MCP Server started - hosting {self.settings.app_name}")
 
     async def stop(self) -> None:
         """Stop the Bitwig MCP server"""
@@ -117,11 +138,13 @@ class BitwigMCPServer:
 
         return get_bitwig_resources()
 
-    async def read_resource(self, uri: str) -> str:
+    async def read_resource(self, uri: Union[AnyUrl, str]) -> str:
         """Read a Bitwig resource
 
         Args:
-            uri: Resource URI to read
+            uri: Resource URI to read. The MCP server hands this over as a
+                pydantic AnyUrl, not a string, so it is coerced before the
+                resource handlers do any string matching on it.
 
         Returns:
             Content of the resource
@@ -132,7 +155,7 @@ class BitwigMCPServer:
         try:
             from bitwig_mcp_server.mcp.resources import read_resource
 
-            return await read_resource(self.controller, uri)
+            return await read_resource(self.controller, str(uri))
         except Exception as e:
             logger.exception(f"Error reading resource {uri}: {e}")
             raise ValueError(f"Failed to read resource {uri}: {e}")
@@ -147,11 +170,23 @@ async def run_server(settings: Optional[Settings] = None) -> None:
     server = BitwigMCPServer(settings)
 
     try:
-        await server.start()
-
-        # Keep the server running
-        while True:
-            await asyncio.sleep(1)
+        # Serve MCP over stdio straight away, and connect to Bitwig alongside it.
+        # Connecting takes ~50s to give up when Bitwig is closed, while MCP
+        # clients drop a server that has not finished the handshake within about
+        # 30s, so the connection must not gate the transport. Logging is
+        # configured onto stderr so stdout carries only the JSON-RPC stream.
+        async with stdio_server() as (read_stream, write_stream):
+            connect_task = asyncio.create_task(server.start())
+            try:
+                await server.mcp_server.run(
+                    read_stream,
+                    write_stream,
+                    server.mcp_server.create_initialization_options(),
+                )
+            finally:
+                connect_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await connect_task
     except asyncio.CancelledError:
         pass
     except KeyboardInterrupt:

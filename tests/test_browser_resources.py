@@ -109,8 +109,8 @@ def test_read_browser_filter_resource(mock_controller):
     assert "[Selected]" in result
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_resource(mock_controller, 3)
@@ -131,8 +131,8 @@ def test_read_browser_filter_name_resource(mock_controller):
     mock_controller.server.get_message.assert_any_call("/browser/filter/1/name")
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_name_resource(mock_controller, 3)
@@ -146,8 +146,8 @@ def test_read_browser_filter_wildcard_resource(mock_controller):
     mock_controller.server.get_message.assert_any_call("/browser/filter/1/wildcard")
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_wildcard_resource(mock_controller, 3)
@@ -161,8 +161,8 @@ def test_read_browser_filter_items_resource(mock_controller):
     assert "[Selected]" in result
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_items_resource(mock_controller, 3)
@@ -176,15 +176,15 @@ def test_read_browser_filter_item_resource(mock_controller):
     assert "Hits: 42" in result
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_resource(mock_controller, 3, 1)
 
     # Test item that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/1/item/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/1/item/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_resource(mock_controller, 1, 3)
@@ -200,8 +200,8 @@ def test_read_browser_filter_item_exists_resource(mock_controller):
     )
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_exists_resource(mock_controller, 3, 1)
@@ -218,15 +218,15 @@ def test_read_browser_filter_item_name_resource(mock_controller):
     mock_controller.server.get_message.assert_any_call("/browser/filter/1/item/1/name")
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_name_resource(mock_controller, 3, 1)
 
     # Test item that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/1/item/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/1/item/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_name_resource(mock_controller, 1, 3)
@@ -243,15 +243,15 @@ def test_read_browser_filter_item_hits_resource(mock_controller):
     mock_controller.server.get_message.assert_any_call("/browser/filter/1/item/1/hits")
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_hits_resource(mock_controller, 3, 1)
 
     # Test item that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/1/item/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/1/item/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_hits_resource(mock_controller, 1, 3)
@@ -270,15 +270,15 @@ def test_read_browser_filter_item_selected_resource(mock_controller):
     )
 
     # Test filter that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_selected_resource(mock_controller, 3, 1)
 
     # Test item that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/filter/1/item/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/filter/1/item/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_filter_item_selected_resource(mock_controller, 1, 3)
@@ -305,8 +305,8 @@ def test_read_browser_result_resource(mock_controller):
     assert "Selected: True" in result
 
     # Test result that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/result/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/result/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_result_resource(mock_controller, 3)
@@ -327,8 +327,8 @@ def test_read_browser_result_name_resource(mock_controller):
     mock_controller.server.get_message.assert_any_call("/browser/result/1/name")
 
     # Test result that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/result/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/result/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_result_name_resource(mock_controller, 3)
@@ -342,8 +342,8 @@ def test_read_browser_result_selected_resource(mock_controller):
     mock_controller.server.get_message.assert_any_call("/browser/result/1/isSelected")
 
     # Test result that doesn't exist
-    mock_controller.server.get_message.side_effect = (
-        lambda key: None if key == "/browser/result/3/exists" else MagicMock()
+    mock_controller.server.get_message.side_effect = lambda key: (
+        None if key == "/browser/result/3/exists" else MagicMock()
     )
     with pytest.raises(ValueError):
         _read_browser_result_selected_resource(mock_controller, 3)

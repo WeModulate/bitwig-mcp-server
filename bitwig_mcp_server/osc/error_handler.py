@@ -312,9 +312,11 @@ class ErrorHandler:
             "connection_status": {
                 "last_successful_comm": self.connection_status["last_successful_comm"],
                 "consecutive_timeouts": self.connection_status["consecutive_timeouts"],
-                "last_error": str(self.connection_status["last_error"])
-                if self.connection_status["last_error"]
-                else None,
+                "last_error": (
+                    str(self.connection_status["last_error"])
+                    if self.connection_status["last_error"]
+                    else None
+                ),
                 "connection_healthy": self.check_connection_health(),
             },
             "recent_errors": {

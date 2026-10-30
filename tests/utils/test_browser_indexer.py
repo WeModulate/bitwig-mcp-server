@@ -388,14 +388,14 @@ async def test_index_browser_content(temp_index_dir):
     ]
 
     # Mock all necessary methods
-    with patch.object(
-        indexer, "initialize_controller", side_effect=mock_init_controller
-    ), patch.object(
-        indexer, "collect_browser_metadata", return_value=devices
-    ), patch.object(
-        indexer, "create_embedding", return_value=[0.1, 0.2, 0.3]
-    ), patch.object(indexer, "close_controller"), patch.object(
-        indexer.collection, "add"
+    with (
+        patch.object(
+            indexer, "initialize_controller", side_effect=mock_init_controller
+        ),
+        patch.object(indexer, "collect_browser_metadata", return_value=devices),
+        patch.object(indexer, "create_embedding", return_value=[0.1, 0.2, 0.3]),
+        patch.object(indexer, "close_controller"),
+        patch.object(indexer.collection, "add"),
     ):
         # Run the indexing
         await indexer.index_browser_content()
@@ -484,9 +484,12 @@ def test_search_devices(temp_index_dir):
 async def test_build_index(temp_index_dir):
     """Test the build_index utility function"""
     # Mock the BitwigBrowserIndexer class and the makedirs function
-    with patch(
-        "bitwig_mcp_server.utils.browser_indexer.BitwigBrowserIndexer"
-    ) as mock_indexer_class, patch("os.makedirs") as mock_makedirs:
+    with (
+        patch(
+            "bitwig_mcp_server.utils.browser_indexer.BitwigBrowserIndexer"
+        ) as mock_indexer_class,
+        patch("os.makedirs") as mock_makedirs,
+    ):
         # Create a mock indexer with async methods properly mocked
         mock_indexer = MagicMock()
 
@@ -665,12 +668,15 @@ async def test_enhance_index_with_descriptions(temp_index_dir):
     }
 
     # Patch the necessary functions
-    with patch(
-        "bitwig_mcp_server.utils.browser_indexer.BitwigBrowserIndexer",
-        return_value=mock_indexer,
-    ), patch(
-        "bitwig_mcp_server.utils.browser_indexer.DeviceDescriptionScraper",
-        return_value=mock_scraper,
+    with (
+        patch(
+            "bitwig_mcp_server.utils.browser_indexer.BitwigBrowserIndexer",
+            return_value=mock_indexer,
+        ),
+        patch(
+            "bitwig_mcp_server.utils.browser_indexer.DeviceDescriptionScraper",
+            return_value=mock_scraper,
+        ),
     ):
         # Run the enhancement function
         updated_count = await enhance_index_with_descriptions(temp_index_dir)
